@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>لوحة تحكم | النور</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --green-deep: #0D2B1E;
+  --green-mid: #1A4A32;
+  --green-bright: #2E7D52;
+  --green-accent: #3DAA6E;
+  --cream: #FAF5E9;
+  --red: #E53E3E;
+  --blue: #3182CE;
+  --sidebar-w: 260px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #0a1f14;
+  color: var(--cream);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── LOGIN ── */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0D2B1E 0%, #0a1f14 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 20px; padding: 3rem 2.5rem;
+  width: 100%; max-width: 400px; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.login-logo { font-family: 'Amiri', serif; font-size: 3rem; color: var(--gold); margin-bottom: 0.5rem; }
+.login-title { font-size: 1.2rem; color: var(--gold-light); margin-bottom: 0.3rem; }
+.login-sub { font-size: 0.8rem; color: #666; margin-bottom: 2rem; }
+.login-input {
+  width: 100%; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(201,168,76,0.2); border-radius: 10px;
+  padding: 0.9rem 1rem; color: var(--cream);
+  font-family: 'Cairo', sans-serif; font-size: 0.95rem;
+  margin-bottom: 1rem; outline: none; text-align: right;
+  transition: border 0.2s;
+}
+.login-input:focus { border-color: var(--gold); }
+.login-btn {
+  width: 100%; background: linear-gradient(135deg, var(--gold) 0%, #a07830 100%);
+  border: none; border-radius: 10px; padding: 1rem;
+  color: var(--green-deep); font-family: 'Cairo', sans-serif;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.05em;
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.3); }
+.login-error { color: var(--red); font-size: 0.85rem; margin-top: 0.75rem; display: none; }
+
+/* ── SIDEBAR ── */
+#app { display: flex; width: 100%; }
+.sidebar {
+  width: var(--sidebar-w); min-height: 100vh;
+  background: linear-gradient(180deg, #0D2B1E 0%, #081a10 100%);
+  border-left: 1px solid rgba(201,168,76,0.15);
+  display: flex; flex-direction: column;
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 100;
+}
+.sidebar-logo {
+  padding: 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.15);
+  text-align: center;
+}
+.sidebar-logo .arabic { font-family: 'Amiri', serif; font-size: 2rem; color: var(--gold); }
+.sidebar-logo .sub { font-size: 0.7rem; color: #555; letter-spacing: 0.1em; }
+
+.sidebar-nav { flex: 1; padding: 1rem 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 1.5rem; cursor: pointer;
+  transition: all 0.2s; color: #666; font-size: 0.9rem;
+  border-right: 3px solid transparent; margin-bottom: 0.1rem;
+}
+.nav-item:hover { color: var(--cream); background: rgba(255,255,255,0.04); }
+.nav-item.active { color: var(--gold); background: rgba(201,168,76,0.08); border-right-color: var(--gold); }
+.nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+.sidebar-footer {
+  padding: 1rem 1.5rem; border-top: 1px solid rgba(201,168,76,0.1);
+}
+.logout-btn {
+  width: 100%; background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
+  color: var(--red); padding: 0.6rem; border-radius: 8px;
+  cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.logout-btn:hover { background: rgba(229,62,62,0.2); }
+
+/* ── MAIN ── */
+.main-content {
+  flex: 1; margin-right: var(--sidebar-w);
+  padding: 2rem; min-height: 100vh;
+}
+
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+.page-title {
+  font-size: 1.5rem; color: var(--gold);
+  margin-bottom: 1.5rem; padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+/* ── STATS ── */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem; margin-bottom: 2rem;
+}
+.stat-card {
+  background: linear-gradient(135deg, rgba(26,74,50,0.6) 0%, rgba(13,43,30,0.8) 100%);
+  border: 1px solid rgba(201,168,76,0.2); border-radius: 16px;
+  padding: 1.5rem; position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(201,168,76,0.05); transform: translate(20px,-20px);
+}
+.stat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.stat-num { font-size: 2.2rem; font-weight: 700; color: var(--white); line-height: 1; }
+.stat-label { font-size: 0.8rem; color: #666; margin-top: 0.3rem; }
+.stat-change { font-size: 0.75rem; color: var(--green-accent); margin-top: 0.5rem; }
+
+/* ── CARDS ── */
+.card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(201,168,76,0.15); border-radius: 16px;
+  padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.card-title { font-size: 1rem; color: var(--gold-light); margin-bottom: 1rem; font-weight: 600; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: right; padding: 0.75rem 1rem;
+  font-size: 0.75rem; letter-spacing: 0.1em; color: #555;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  text-transform: uppercase;
+}
+.data-table td {
+  padding: 0.85rem 1rem; font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--cream);
+}
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.badge {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 10px;
+  font-size: 0.7rem; font-weight: 700;
+}
+.badge-green { background: rgba(61,170,110,0.2); color: var(--green-accent); }
+.badge-gold { background: rgba(201,168,76,0.2); color: var(--gold); }
+.badge-red { background: rgba(229,62,62,0.2); color: var(--red); }
+
+/* ── FORMS ── */
+.form-group { margin-bottom: 1rem; }
+.form-label { font-size: 0.8rem; color: #888; margin-bottom: 0.4rem; display: block; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,168,76,0.2); border-radius: 10px;
+  padding: 0.75rem 1rem; color: var(--cream);
+  font-family: 'Cairo', sans-serif; font-size: 0.9rem;
+  outline: none; transition: border 0.2s; text-align: right;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--gold); }
+.form-textarea { min-height: 100px; resize: vertical; }
+.form-select option { background: #1a1a1a; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.btn {
+  padding: 0.65rem 1.25rem; border-radius: 10px; border: none;
+  cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.875rem;
+  font-weight: 600; transition: all 0.2s; display: inline-flex;
+  align-items: center; gap: 0.4rem;
+}
+.btn-primary { background: linear-gradient(135deg, var(--gold) 0%, #a07830 100%); color: var(--green-deep); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(201,168,76,0.3); }
+.btn-danger { background: rgba(229,62,62,0.15); color: var(--red); border: 1px solid rgba(229,62,62,0.3); }
+.btn-danger:hover { background: rgba(229,62,62,0.25); }
+.btn-secondary { background: rgba(255,255,255,0.06); color: var(--cream); border: 1px solid rgba(255,255,255,0.1); }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+/* ── ADS ── */
+.ad-preview {
+  background: rgba(201,168,76,0.08); border: 2px dashed rgba(201,168,76,0.3);
+  border-radius: 12px; padding: 1.5rem; text-align: center;
+  color: #666; font-size: 0.85rem; margin-bottom: 1rem;
+}
+
+/* ── CHART ── */
+.chart-bar-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
+.chart-row { display: flex; align-items: center; gap: 1rem; }
+.chart-label { width: 80px; font-size: 0.75rem; color: #666; text-align: right; flex-shrink: 0; }
+.chart-bar-bg { flex: 1; height: 28px; background: rgba(255,255,255,0.04); border-radius: 6px; overflow: hidden; }
+.chart-bar { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-right: 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--green-deep); transition: width 1s ease; }
+.chart-val { width: 50px; font-size: 0.75rem; color: #888; text-align: left; flex-shrink: 0; }
+
+/* ── TOGGLE ── */
+.toggle-wrap { display: flex; align-items: center; gap: 0.75rem; }
+.toggle {
+  width: 44px; height: 24px; background: rgba(255,255,255,0.1);
+  border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s;
+}
+.toggle.on { background: var(--green-accent); }
+.toggle::after {
+  content: ''; position: absolute; width: 18px; height: 18px;
+  background: white; border-radius: 50%; top: 3px; right: 3px;
+  transition: transform 0.3s;
+}
+.toggle.on::after { transform: translateX(-20px); }
+.toggle-label { font-size: 0.875rem; color: var(--cream); }
+
+/* ── TOAST ── */
+.toast-admin {
+  position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--green-accent); color: white;
+  padding: 0.75rem 1.5rem; border-radius: 20px;
+  font-size: 0.875rem; font-weight: 600; z-index: 9999;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.toast-admin.show { opacity: 1; }
+
+@media (max-width: 768px) {
+  .sidebar { width: 220px; }
+  .main-content { margin-right: 220px; padding: 1rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">النور</div>
+    <div class="login-title">لوحة تحكم الأدمن</div>
+    <div class="login-sub">Admin Dashboard · Al-Noor Islamic Hub</div>
+    <input type="text" class="login-input" id="login-user" placeholder="اسم المستخدم" autocomplete="off"/>
+    <input type="password" class="login-input" id="login-pass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">🔐 دخول</button>
+    <div class="login-error" id="login-error">❌ اسم المستخدم أو كلمة المرور غلط</div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" style="display:none;width:100%">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="arabic">النور</div>
+    <div class="sub">ADMIN PANEL</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> الإحصائيات
+    </div>
+    <div class="nav-item" onclick="showPage('hadiths')">
+      <span class="nav-icon">📚</span> الأحاديث
+    </div>
+    <div class="nav-item" onclick="showPage('surahs')">
+      <span class="nav-icon">📖</span> السور
+    </div>
+    <div class="nav-item" onclick="showPage('events')">
+      <span class="nav-icon">🌙</span> المناسبات
+    </div>
+    <div class="nav-item" onclick="showPage('ads')">
+      <span class="nav-icon">📢</span> الإعلانات
+    </div>
+    <div class="nav-item" onclick="showPage('settings')">
+      <span class="nav-icon">⚙️</span> الإعدادات
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="font-size:0.7rem;color:#444;text-align:center;margin-bottom:0.5rem">مرحباً، أدمن 👋</div>
+    <button class="logout-btn" onclick="doLogout()">🚪 تسجيل الخروج</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">📊 لوحة الإحصائيات</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-num" id="stat-visitors">--</div>
+        <div class="stat-label">زوار اليوم</div>
+        <div class="stat-change">↑ مرتبط بـ Google Analytics</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-num">10</div>
+        <div class="stat-label">أحاديث منشورة</div>
+        <div class="stat-change">↑ 5 فئات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📖</div>
+        <div class="stat-num">28</div>
+        <div class="stat-label">سور مضافة</div>
+        <div class="stat-change">من أصل 114</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌙</div>
+        <div class="stat-num">10</div>
+        <div class="stat-label">مناسبات إسلامية</div>
+        <div class="stat-change">↑ 5 قادمة</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="card">
+        <div class="card-title">📈 الزوار حسب اليوم (تقريبي)</div>
+        <div class="chart-bar-wrap" id="chart-days"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌍 أكثر الدول زيارة</div>
+        <div class="chart-bar-wrap" id="chart-countries"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 روابط مفيدة</div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <a href="https://analytics.google.com" target="_blank" class="btn btn-secondary">📊 Google Analytics</a>
+        <a href="https://search.google.com/search-console" target="_blank" class="btn btn-secondary">🔍 Search Console</a>
+        <a href="https://al-noor-islamic.netlify.app" target="_blank" class="btn btn-secondary">🌐 زيارة الموقع</a>
+        <a href="https://app.netlify.com" target="_blank" class="btn btn-secondary">🚀 Netlify</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HADITHS -->
+  <div class="page" id="page-hadiths">
+    <div class="page-title">📚 إدارة الأحاديث</div>
+
+    <div class="card">
+      <div class="card-title">➕ إضافة حديث جديد</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">المصدر</label>
+          <select class="form-select" id="h-source">
+            <option>صحيح البخاري</option>
+            <option>صحيح مسلم</option>
+            <option>سنن أبي داود</option>
+            <option>سنن الترمذي</option>
+            <option>سنن ابن ماجه</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">الفئة</label>
+          <select class="form-select" id="h-category">
+            <option value="faith">الإيمان</option>
+            <option value="prayer">الصلاة</option>
+            <option value="character">الأخلاق</option>
+            <option value="knowledge">العلم</option>
+            <option value="dua">الدعاء</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">نص الحديث بالعربية</label>
+        <textarea class="form-textarea" id="h-arabic" placeholder="اكتب نص الحديث بالعربية..." style="font-family:'Amiri',serif;font-size:1.1rem"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الترجمة بالإنجليزية</label>
+        <textarea class="form-textarea" id="h-english" placeholder="English translation..." style="text-align:left;direction:ltr"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الراوي</label>
+        <input type="text" class="form-input" id="h-narrator" placeholder="مثال: أبو هريرة رضي الله عنه"/>
+      </div>
+      <button class="btn btn-primary" onclick="addHadith()">✅ إضافة الحديث</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 الأحاديث الحالية</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>الراوي</th>
+            <th>المصدر</th>
+            <th>الفئة</th>
+            <th>الإجراء</th>
+          </tr>
+        </thead>
+        <tbody id="hadiths-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SURAHS -->
+  <div class="page" id="page-surahs">
+    <div class="page-title">📖 إدارة السور</div>
+    <div class="card">
+      <div class="card-title">➕ إضافة سورة</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">رقم السورة</label>
+          <input type="number" class="form-input" id="s-num" placeholder="مثال: 36" min="1" max="114"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">اسم السورة بالعربية</label>
+          <input type="text" class="form-input" id="s-arabic" placeholder="مثال: يس"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">الاسم بالإنجليزية</label>
+          <input type="text" class="form-input" id="s-name" placeholder="مثال: Ya-Sin" style="direction:ltr;text-align:left"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">عدد الآيات</label>
+          <input type="number" class="form-input" id="s-verses" placeholder="مثال: 83"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">النوع</label>
+        <select class="form-select" id="s-type">
+          <option value="Meccan">مكية</option>
+          <option value="Medinan">مدنية</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addSurah()">✅ إضافة السورة</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 السور المضافة</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>الرقم</th><th>الاسم</th><th>عربي</th><th>الآيات</th><th>النوع</th><th>حذف</th></tr>
+        </thead>
+        <tbody id="surahs-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="page" id="page-events">
+    <div class="page-title">🌙 إدارة المناسبات الإسلامية</div>
+    <div class="card">
+      <div class="card-title">➕ إضافة مناسبة</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">اسم المناسبة</label>
+          <input type="text" class="form-input" id="e-name" placeholder="مثال: عيد الفطر"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">بالعربية</label>
+          <input type="text" class="form-input" id="e-arabic" placeholder="مثال: عيد الفطر المبارك"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">التاريخ الميلادي</label>
+          <input type="text" class="form-input" id="e-greg" placeholder="مثال: April 20, 2026" style="direction:ltr;text-align:left"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">التاريخ الهجري</label>
+          <input type="text" class="form-input" id="e-hijri" placeholder="مثال: 1 شوال 1447"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الحالة</label>
+        <select class="form-select" id="e-type">
+          <option value="upcoming">قادمة</option>
+          <option value="passed">مضت</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addEvent()">✅ إضافة المناسبة</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 المناسبات الحالية</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>المناسبة</th><th>التاريخ</th><th>الحالة</th><th>حذف</th></tr>
+        </thead>
+        <tbody id="events-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ADS -->
+  <div class="page" id="page-ads">
+    <div class="page-title">📢 إدارة الإعلانات</div>
+
+    <div class="card">
+      <div class="card-title">🔧 إعدادات Google AdSense</div>
+      <div class="form-group">
+        <label class="form-label">Publisher ID (ca-pub-XXXXXXXXXX)</label>
+        <input type="text" class="form-input" id="adsense-id" placeholder="ca-pub-XXXXXXXXXX" style="direction:ltr;text-align:left"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ad Slot ID</label>
+        <input type="text" class="form-input" id="ad-slot" placeholder="XXXXXXXXXX" style="direction:ltr;text-align:left"/>
+      </div>
+      <button class="btn btn-primary" onclick="saveAd()">💾 حفظ الإعدادات</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 مواضع الإعلانات</div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:10px">
+          <span>إعلان أعلى الصفحة</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')" title="تفعيل/إيقاف"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:10px">
+          <span>إعلان بين الأقسام</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')" title="تفعيل/إيقاف"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:10px">
+          <span>إعلان أسفل الصفحة</span>
+          <div class="toggle" onclick="this.classList.toggle('on')" title="تفعيل/إيقاف"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 كيف تضيف AdSense؟</div>
+      <div style="font-size:0.85rem;color:#888;line-height:1.8">
+        <p>١. روح على <a href="https://adsense.google.com" target="_blank" style="color:var(--gold)">adsense.google.com</a> وسجل حساب</p>
+        <p>٢. أضف موقعك <strong>al-noor-islamic.netlify.app</strong></p>
+        <p>٣. استنى موافقة Google (من 2 لـ 4 أسابيع)</p>
+        <p>٤. بعد الموافقة هيديك الـ Publisher ID</p>
+        <p>٥. حطه هنا وأنا هضيفه في الكود ✅</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="page-title">⚙️ إعدادات الموقع</div>
+
+    <div class="card">
+      <div class="card-title">🔐 تغيير كلمة المرور</div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور الحالية</label>
+        <input type="password" class="form-input" id="old-pass"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور الجديدة</label>
+        <input type="password" class="form-input" id="new-pass"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">تأكيد كلمة المرور</label>
+        <input type="password" class="form-input" id="confirm-pass"/>
+      </div>
+      <button class="btn btn-primary" onclick="changePassword()">🔒 تغيير كلمة المرور</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌐 معلومات الموقع</div>
+      <div class="form-group">
+        <label class="form-label">اسم الموقع</label>
+        <input type="text" class="form-input" value="Al-Noor Islamic Hub"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">وصف الموقع</label>
+        <textarea class="form-textarea" style="direction:ltr;text-align:left">Free all-in-one Islamic web app for Muslims worldwide</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رابط الموقع</label>
+        <input type="text" class="form-input" value="https://al-noor-islamic.netlify.app" style="direction:ltr;text-align:left"/>
+      </div>
+      <button class="btn btn-primary" onclick="showToast('✅ تم حفظ الإعدادات!')">💾 حفظ</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📤 تصدير البيانات</div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="exportData('hadiths')">📚 تصدير الأحاديث</button>
+        <button class="btn btn-secondary" onclick="exportData('events')">🌙 تصدير المناسبات</button>
+        <button class="btn btn-secondary" onclick="exportData('all')">📦 تصدير الكل</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main-content -->
+</div><!-- end app -->
+
+<!-- TOAST -->
+<div class="toast-admin" id="admin-toast"></div>
+
+<script>
+// ─── AUTH ───────────────────────────────────────────
+const ADMIN_USER = 'admin';
+let ADMIN_PASS = localStorage.getItem('admin_pass') || 'alnoor2026';
+
+function doLogin() {
+  const u = document.getElementById('login-user').value;
+  const p = document.getElementById('login-pass').value;
+  if(u === ADMIN_USER && p === ADMIN_PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initDashboard();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+function changePassword() {
+  const old = document.getElementById('old-pass').value;
+  const np = document.getElementById('new-pass').value;
+  const cp = document.getElementById('confirm-pass').value;
+  if(old !== ADMIN_PASS) return showToast('❌ كلمة المرور الحالية غلط!');
+  if(np !== cp) return showToast('❌ كلمة المرور الجديدة مش متطابقة!');
+  if(np.length < 6) return showToast('❌ كلمة المرور أقل من 6 أحرف!');
+  ADMIN_PASS = np;
+  localStorage.setItem('admin_pass', np);
+  showToast('✅ تم تغيير كلمة المرور بنجاح!');
+  document.getElementById('old-pass').value = '';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('confirm-pass').value = '';
+}
+
+// ─── NAV ────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='hadiths') renderHadithsTable();
+  if(id==='surahs') renderSurahsTable();
+  if(id==='events') renderEventsTable();
+}
+
+// ─── DASHBOARD ──────────────────────────────────────
+function initDashboard() {
+  // Simulated chart data
+  const days = [
+    {label:'السبت', val:45},
+    {label:'الأحد', val:72},
+    {label:'الإثنين', val:58},
+    {label:'الثلاثاء', val:91},
+    {label:'الأربعاء', val:63},
+    {label:'الخميس', val:88},
+    {label:'الجمعة', val:120},
+  ];
+  const countries = [
+    {label:'مصر', val:85},
+    {label:'السعودية', val:72},
+    {label:'الإمارات', val:55},
+    {label:'المغرب', val:40},
+    {label:'أمريكا', val:30},
+  ];
+  renderChart('chart-days', days, '#C9A84C');
+  renderChart('chart-countries', countries, '#3DAA6E');
+  document.getElementById('stat-visitors').textContent = '120+';
+}
+
+function renderChart(id, data, color) {
+  const max = Math.max(...data.map(d=>d.val));
+  document.getElementById(id).innerHTML = data.map(d=>`
+    <div class="chart-row">
+      <div class="chart-label">${d.label}</div>
+      <div class="chart-bar-bg">
+        <div class="chart-bar" style="width:${(d.val/max*100)}%;background:${color}">${d.val}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── HADITHS DATA ───────────────────────────────────
+let hadiths = JSON.parse(localStorage.getItem('admin_hadiths') || '[]');
+
+function addHadith() {
+  const h = {
+    id: Date.now(),
+    source: document.getElementById('h-source').value,
+    category: document.getElementById('h-category').value,
+    arabic: document.getElementById('h-arabic').value,
+    english: document.getElementById('h-english').value,
+    narrator: document.getElementById('h-narrator').value,
+  };
+  if(!h.arabic) return showToast('❌ اكتب نص الحديث!');
+  hadiths.push(h);
+  localStorage.setItem('admin_hadiths', JSON.stringify(hadiths));
+  document.getElementById('h-arabic').value = '';
+  document.getElementById('h-english').value = '';
+  document.getElementById('h-narrator').value = '';
+  renderHadithsTable();
+  showToast('✅ تم إضافة الحديث!');
+}
+
+function deleteHadith(id) {
+  hadiths = hadiths.filter(h=>h.id!==id);
+  localStorage.setItem('admin_hadiths', JSON.stringify(hadiths));
+  renderHadithsTable();
+  showToast('🗑️ تم حذف الحديث');
+}
+
+function renderHadithsTable() {
+  const tb = document.getElementById('hadiths-table');
+  if(!hadiths.length) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#555;padding:2rem">لا توجد أحاديث مضافة بعد</td></tr>'; return; }
+  tb.innerHTML = hadiths.map(h=>`
+    <tr>
+      <td>${h.narrator||'—'}</td>
+      <td><span class="badge badge-gold">${h.source}</span></td>
+      <td><span class="badge badge-green">${h.category}</span></td>
+      <td><button class="btn btn-danger" onclick="deleteHadith(${h.id})" style="padding:0.3rem 0.7rem;font-size:0.75rem">🗑️ حذف</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── SURAHS DATA ────────────────────────────────────
+let surahs = JSON.parse(localStorage.getItem('admin_surahs') || '[]');
+
+function addSurah() {
+  const s = {
+    id: Date.now(),
+    num: document.getElementById('s-num').value,
+    arabic: document.getElementById('s-arabic').value,
+    name: document.getElementById('s-name').value,
+    verses: document.getElementById('s-verses').value,
+    type: document.getElementById('s-type').value,
+  };
+  if(!s.name || !s.num) return showToast('❌ أكمل البيانات!');
+  surahs.push(s);
+  localStorage.setItem('admin_surahs', JSON.stringify(surahs));
+  ['s-num','s-arabic','s-name','s-verses'].forEach(id=>document.getElementById(id).value='');
+  renderSurahsTable();
+  showToast('✅ تم إضافة السورة!');
+}
+
+function deleteSurah(id) {
+  surahs = surahs.filter(s=>s.id!==id);
+  localStorage.setItem('admin_surahs', JSON.stringify(surahs));
+  renderSurahsTable();
+  showToast('🗑️ تم حذف السورة');
+}
+
+function renderSurahsTable() {
+  const tb = document.getElementById('surahs-table');
+  if(!surahs.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;padding:2rem">لا توجد سور مضافة بعد</td></tr>'; return; }
+  tb.innerHTML = surahs.map(s=>`
+    <tr>
+      <td>${s.num}</td>
+      <td>${s.name}</td>
+      <td style="font-family:'Amiri',serif">${s.arabic}</td>
+      <td>${s.verses}</td>
+      <td><span class="badge badge-green">${s.type==='Meccan'?'مكية':'مدنية'}</span></td>
+      <td><button class="btn btn-danger" onclick="deleteSurah(${s.id})" style="padding:0.3rem 0.7rem;font-size:0.75rem">🗑️</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── EVENTS DATA ────────────────────────────────────
+let events = JSON.parse(localStorage.getItem('admin_events') || '[]');
+
+function addEvent() {
+  const e = {
+    id: Date.now(),
+    name: document.getElementById('e-name').value,
+    arabic: document.getElementById('e-arabic').value,
+    greg: document.getElementById('e-greg').value,
+    hijri: document.getElementById('e-hijri').value,
+    type: document.getElementById('e-type').value,
+  };
+  if(!e.name) return showToast('❌ اكتب اسم المناسبة!');
+  events.push(e);
+  localStorage.setItem('admin_events', JSON.stringify(events));
+  ['e-name','e-arabic','e-greg','e-hijri'].forEach(id=>document.getElementById(id).value='');
+  renderEventsTable();
+  showToast('✅ تم إضافة المناسبة!');
+}
+
+function deleteEvent(id) {
+  events = events.filter(e=>e.id!==id);
+  localStorage.setItem('admin_events', JSON.stringify(events));
+  renderEventsTable();
+  showToast('🗑️ تم حذف المناسبة');
+}
+
+function renderEventsTable() {
+  const tb = document.getElementById('events-table');
+  if(!events.length) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#555;padding:2rem">لا توجد مناسبات مضافة بعد</td></tr>'; return; }
+  tb.innerHTML = events.map(e=>`
+    <tr>
+      <td>${e.name}<br><small style="color:#666;font-family:'Amiri',serif">${e.arabic}</small></td>
+      <td style="font-size:0.8rem">${e.greg}<br><small style="color:#666">${e.hijri}</small></td>
+      <td><span class="badge ${e.type==='upcoming'?'badge-green':'badge-red'}">${e.type==='upcoming'?'قادمة':'مضت'}</span></td>
+      <td><button class="btn btn-danger" onclick="deleteEvent(${e.id})" style="padding:0.3rem 0.7rem;font-size:0.75rem">🗑️</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── ADS ────────────────────────────────────────────
+function saveAd() {
+  const id = document.getElementById('adsense-id').value;
+  if(!id) return showToast('❌ أدخل Publisher ID!');
+  localStorage.setItem('adsense_id', id);
+  showToast('✅ تم حفظ إعدادات AdSense! ابعت الـ ID لـ Claude عشان يضيفه في الكود');
+}
+
+// ─── EXPORT ─────────────────────────────────────────
+function exportData(type) {
+  let data = {};
+  if(type==='hadiths' || type==='all') data.hadiths = hadiths;
+  if(type==='events' || type==='all') data.events = events;
+  if(type==='all') data.surahs = surahs;
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `alnoor-${type}-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  showToast('✅ تم تصدير البيانات!');
+}
+
+// ─── TOAST ──────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('admin-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
